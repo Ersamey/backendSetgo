@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Models\LoginModel;
 use App\Models\SiswaModel;
+use App\Models\GuruModel;
 
 class Login extends BaseController
 {
     protected $loginModel;
     protected $siswaModel;
+    protected $guruModel;
 
     public function __construct()
     {
         $this->loginModel = new LoginModel();
         $this->siswaModel = new SiswaModel();
+        $this->guruModel = new GuruModel();
     }
     public function index()
     {
@@ -50,8 +53,9 @@ class Login extends BaseController
 
         // Ambil data siswa berdasarkan id_login
         $siswa = $this->siswaModel->where('id_login', $user['id_login'])->first();
+        $guru = $this->guruModel->where('id_login', $user['id_login'])->first();
 
-        if (!$siswa) {
+        if (!$siswa && !$guru) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Data siswa not found'
@@ -64,19 +68,37 @@ class Login extends BaseController
         $_SESSION['isLoggedIn'] = true;
         $_SESSION['id_login'] = $user['id_login'];
 
-        // Login berhasil, kembalikan data termasuk role
-        return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Login success',
-            'data' => [
-                'username' => $user['username'],
-                'full_name' => $siswa['full_name'],
-                'image' => $siswa['image'],
-                'role' => $user['role']
-            ]
-        ]);
+        if ($user['role'] == 'siswa') {
+
+            // Login berhasil, kembalikan data termasuk role
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Login success',
+                'data' => [
+                    'username' => $user['username'],
+                    'full_name' => $siswa['full_name'],
+                    'image' => $siswa['image'],
+                    'role' => $user['role']
+                ]
+            ]);
+        } else if ($user['role'] == 'guru') {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Login success',
+                'data' => [
+                    'username' => $user['username'],
+                    'full_name' => $guru['full_name'],
+                    'image' => $guru['image'],
+                    'role' => $user['role']
+                ]
+            ]);
+        }
     }
 
+    public function cobalogni()
+    {
+        return view('login');
+    }
     public function getUserData()
     {
         session_start();
@@ -89,20 +111,34 @@ class Login extends BaseController
 
         // Ambil data siswa berdasarkan id_login
         $siswa = $this->siswaModel->where('id_login', $_SESSION['id_login'])->first();
+        $guru = $this->guruModel->where('id_login', $_SESSION['id_login'])->first();
 
-        if (!$siswa) {
+        if (!$siswa && !$guru) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Data siswa not found'
             ])->setStatusCode(404);
         }
 
-        return $this->response->setJSON([
-            'success' => true,
-            'data' => [
+        // cek apakah data yang diambil adalah data siswa atau data guru
+        if ($siswa) {
+            $data = [
                 'full_name' => $siswa['full_name'],
                 'image' => $siswa['image'],
-            ],
+                'role' => 'siswa'
+            ];
+        } else {
+            $data = [
+                'full_name' => $guru['full_name'],
+                'image' => $guru['image'],
+                'role' => 'guru'
+            ];
+        }
+
+        // kembalikan data
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $data
         ]);
     }
 
