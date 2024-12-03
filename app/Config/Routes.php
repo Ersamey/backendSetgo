@@ -10,6 +10,11 @@ $routes->post('/login', 'Login::create');
 $routes->get('/login', 'Login::cobalogni');
 $routes->post('/masuk', 'Login::index');
 $routes->get('/getUserData', 'Login::getUserData');
+
+// Siswa
 $routes->get('/getKelas', 'Siswa::kelas');
 $routes->get('/join', 'Siswa::join');
 $routes->post('/addClass', 'Siswa::addClass');
+
+// Guru
+$routes->get('/kelasGuru', 'Guru::kelas');
