@@ -18,3 +18,5 @@ $routes->post('/addClass', 'Siswa::addClass');
 
 // Guru
 $routes->get('/kelasGuru', 'Guru::kelas');
+$routes->get('/siswaKu', 'Guru::siswaKu');
+$routes->get('/buatKelas', 'Guru::buatKelas');
